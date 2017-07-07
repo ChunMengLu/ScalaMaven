@@ -12,8 +12,11 @@ import reactor.core.publisher.Flux
 class TestController(private val userRepository: UserRepository) {
 
   @GetMapping(Array("index.json"))
-  def handleGetUsers: Flux[User] = {
-    Flux.fromIterable(userRepository.findAll()).log()
+  def handleGetUsers: Object = {
+    // 直接返回对象不使用Flux包装会自动使用Mono.justOrEmpty(body)包装
+    // AbstractMessageWriterResultHandler.writeBody 90行
+    // userRepository.findAll()
+    Flux.fromIterable(userRepository.findAll).log()
   }
 
 }
