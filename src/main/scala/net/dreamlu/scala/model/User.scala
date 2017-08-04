@@ -18,7 +18,7 @@ import javax.persistence.GenerationType
 
 @Table(name = "users")
 @Entity
-class User {
+class User extends Serializable {
   @Id
   @BeanProperty
   @GeneratedValue(strategy = GenerationType.IDENTITY)
