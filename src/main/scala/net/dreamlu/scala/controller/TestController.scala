@@ -11,6 +11,8 @@ import net.dreamlu.scala.repository.UserRepository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import net.dreamlu.scala.common.Results
+import org.springframework.validation.BindingResult
+import org.springframework.validation.BindingResultUtils
 
 @RestController
 class TestController(private val userRepository: UserRepository) {
@@ -29,8 +31,15 @@ class TestController(private val userRepository: UserRepository) {
   }
 
   @PostMapping(Array("test/user"))
-  def handlePostUser(@Valid user: User): Object = {
-    Results.success(userRepository.save(user))
+  def handlePostUser(@Valid user: User, br: BindingResult): Object = {
+    if (br.hasErrors()) {
+      var fieldError = br.getFieldError
+      var fieldName = fieldError.getField
+      var errorMsg = fieldError.getDefaultMessage
+      Results.failure(s"${fieldName}:${errorMsg}")
+    } else {
+      Results.success(userRepository.save(user))
+    }
   }
 
 }
