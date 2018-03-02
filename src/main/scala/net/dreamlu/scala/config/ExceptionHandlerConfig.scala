@@ -19,7 +19,11 @@ import reactor.core.publisher.Mono
 import org.springframework.http.HttpStatus
 
 /**
- * 此处有问题
+ * 此处有问题ExceptionHandler是为webmvc设计的
+ * 
+ * flux 采用
+ *  ErrorWebFluxAutoConfiguration
+ *  DefaultErrorWebExceptionHandler
  */
 @ControllerAdvice
 @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -41,35 +45,4 @@ class ExceptionHandlerConfig {
     Results.failure(errorMsg)
   }
 
-  @Bean
-  @Order
-  def responseStatusExceptionHandler(): WebExceptionHandler = {
-    new WebFluxExceptionHandler()
-  }
-}
-
-class WebFluxExceptionHandler extends WebExceptionHandler {
-  private val logger = LoggerFactory.getLogger(classOf[WebFluxExceptionHandler])
-
-  override def handle(exchange: ServerWebExchange, ex: Throwable): Mono[Void] = {
-    if (ex.getMessage() != null) {
-      logger.error(ex.getMessage());
-    }
-    if (ex.isInstanceOf[ResponseStatusException]) {
-      val statusCode = ex.asInstanceOf[ResponseStatusException].getStatus
-      exchange.getResponse().setStatusCode(statusCode);
-    }
-    if (ex.isInstanceOf[BindException]) {
-      val fieldError = ex.asInstanceOf[BindException].getFieldError()
-      val errorMsg = fieldError.getDefaultMessage()
-      var result = Results.failure(errorMsg)
-      val body = Mono.just(result)
-      //      exchange.getResponse.writeWith(body)
-      //      exchange.getResponse.writeAndFlushWith(body)
-      //      Mono.empty()
-      Mono.error(ex)
-    } else {
-      Mono.error(ex)
-    }
-  }
 }
